@@ -1,0 +1,23 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .full-height {
+        height: 60vh;
+    }
+</style>
+<div class="container full-height">
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <h1>Are you sure you want to delete the task "<u style="color: black;">{{ task.title }}</u>"?</h1>
+                <p>{{ task.description|safe }}</p>
+                <input type="submit" value="Yes, Delete" class="btn btn-danger">
+                <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

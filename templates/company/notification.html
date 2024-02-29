@@ -1,0 +1,23 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+<h3>Notifications</h3>
+{% for x in notify %}
+    <div style="padding: 6px;">
+        <div style="padding: 6px;" class="card">
+            <a class="dropdown-item d-flex align-items-center" href="{% url 'notification_detail' x.pk %}">
+                <div class="mr-3">
+                    <div class="icon-circle bg-primary">
+                        <i class="fas fa-file-alt text-white"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="small text-gray-500">{{ x.created_at }}</div>
+                    <span class="font-weight-bold">{{ x.title }}</span>
+                </div>
+            </a>
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,471 @@
+{% extends './base.html' %}
+{% load static %}
+{% block content %}
+<script src="{% static 'tinymce/tinymce.min.js' %}"></script>
+<style>
+    .full-height {
+        height: 100vh;
+    }
+    #not_started_body, #in_progress_body, #COMPLETED_body {
+        border: solid 2px gray;
+        border-radius: 12px;
+        margin-bottom: 20px; /* Vertical spacing between columns */
+        background-color: white;
+    }
+    #not_started_body, #in_progress_body, #COMPLETED_body {
+        margin-right: 20px;
+    }
+    #not_started, #in_progress, #COMPLETED {
+        height: 56vh;
+    }
+    .underline-input {
+        width: 100%; 
+        border: none;
+        border-bottom: 1px solid rgba(128, 128, 128, 0.486); 
+        box-shadow: none;
+        outline: none;
+        padding-bottom: 4px;
+    }
+    .form-group {
+        margin-bottom: 18px; /* Adds space between form groups */
+    }
+
+</style>
+<div class="container-fluid full-height">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>Tasks - ({{ task_count }})</h3>
+
+        <div style="padding: 8px; border: solid 2px rgba(128, 128, 128, 0.438); border-radius: 5px; display: flex; align-items: center; justify-content: center;">
+            <p id="timer" style="margin: 0; line-height: 1; padding-right: 12px; font-size: larger;"><b>25:00</b></p>
+            <a href="" class="btn btn-danger btn-sm" id="toggleTimer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
+                    <path d="M10.804 8 5 4.633v6.734zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696z"/>
+                </svg>
+            </a>
+        </div>
+        <script>
+            let countdownn; // Holds the countdown interval ID
+            let isRunning = false; // Tracks whether the timer is running
+            const startTime = 25 * 60; // 25 minutes in seconds
+            let time = startTime; // Current time left on the timer
+        
+            const timerDisplay = document.getElementById('timer');
+            const toggleTimerButton = document.getElementById('toggleTimer');
+        
+            // Function to start or stop the timer
+            function toggleTimer() {
+                if (isRunning) {
+                    clearInterval(countdownn); // Stop the timer
+                } else {
+                    countdownn = setInterval(() => {
+                        time--;
+                        updateDisplay();
+                        if (time <= 0) {
+                            clearInterval(countdownn);
+                            isRunning = false;
+                        }
+                    }, 1000); // Update every second
+                }
+                isRunning = !isRunning; // Toggle the running state
+            }
+        
+            // Update the display
+            function updateDisplay() {
+                const minutes = Math.floor(time / 60);
+                const seconds = time % 60;
+                timerDisplay.innerHTML = `<b>${minutes}:${seconds < 10 ? '0' : ''}${seconds}</b>`;
+            }
+        
+            toggleTimerButton.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent the default anchor action
+                toggleTimer();
+            });
+        </script>
+
+        <a href="#" id="load-upload-btn" class="btn btn-info" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight" aria-controls="sidebarRight">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+            </svg>
+        </a>
+    </div>
+    <hr>
+    <!-- <div class="row">
+        <div class="col-6 col-sm-3" >
+            <div class="card">
+                <div class="card-body" style="text-align: center;">
+                    <h1 id="timer" style="color: rgba(255, 0, 0, 0.589);">25:00</h1>
+                    <div class="d-flex">
+                        <audio id="start_button_click" src="{% static 'audio/start-button-click.mp3' %}" preload="auto"></audio>
+                        <button id="start_button" onclick="startCountdown()" class="btn btn-success form-control">Start</button>
+
+                        <audio id="clickSound" src="{% static 'audio/button-click.mp3' %}" preload="auto"></audio>
+                        <button id="toggleButton" onclick="pauseCountdown()" class="btn btn-danger form-control">Pause</button>
+
+
+                        <audio id="bellSound" src="{% static 'audio/bell-ring.mp3' %}"></audio>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">Pure 40 HZ Binural Beats</h6>
+                            <audio controls class="w-100">
+                                <source src="{% static 'audio/Pure_40_HZ_Binural_Beats.mp3' %}" type="audio/mpeg">
+                            </audio>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <div class="task-detail">
+                        <div class="spinner-grow text-primary" role="status">
+                        </div>
+                        <div class="spinner-grow text-secondary" role="status">
+                        </div> 
+                        <div class="spinner-grow text-success" role="status">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <div id="message"></div>
+    <form class="sortable" hx-post="/items/" hx-trigger="end" hx-target="#message">
+        {% csrf_token %}
+        <div class="htmx-indicator">Updating...</div>
+
+        <div class="d-flex">
+
+            <!-- NOT_STARTED -->
+            <div id="not_started_body" class="card-body">
+                <div class="d-flex">
+                    <h4 style="padding-right: 5px;">Not Started</h4>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-dash-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
+                    </svg>
+                </div>
+                <!-- <h4>Not Started ({{ status_counts.NOT_STARTED }})</h4> -->
+                <hr>
+                <div id="not_started" class="status-list card-body overflow-auto" data-status="NOT_STARTED" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2">
+                    {% for task in tasks %}
+                        {% if task.status == "NOT_STARTED" %}
+                        <div class="card mb-2 task-item" data-id="{{ task.id }}">
+                            <a href="javascript:void(0);" class="task-link" data-url="{% url 'items_detail' task.pk %}">
+                                <div class="card-body">
+                                    <input type='hidden' name='item' value='{{ task.id }}' />
+                                    <input type='hidden' name='status' value='{{ task.status }}' />
+                                    <b>
+                                        {% if task.title|length > 35 %}
+                                            {{ task.title|slice:"0:35" }}...
+                                        {% else %}
+                                            {{ task.title }}
+                                        {% endif %}
+                                    </b>
+                                </div>
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+    
+            <!-- IN_PROGRESS -->
+            <div id="in_progress_body" class="card-body">
+                <div class="d-flex">
+                    <h4 style="padding-right: 5px">In Progress</h4>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-clock" viewBox="0 0 16 16">
+                        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                      </svg>
+                </div>
+                <!-- <h4>In Progress ({{ status_counts.IN_PROGRESS }})</h4> -->
+                <hr>
+                <div id="in_progress" class="status-list card-body overflow-auto" data-status="IN_PROGRESS" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2">
+                    {% for task in tasks %}
+                        {% if task.status == "IN_PROGRESS" %}
+                        <div class="card mb-3 task-item" data-id="{{ task.id }}">
+                            <a href="javascript:void(0);" class="task-link" data-url="{% url 'items_detail' task.pk %}">
+                                <div class="card-body">
+                                    <input type='hidden' name='item' value='{{ task.id }}' />
+                                    <input type='hidden' name='status' value='{{ task.status }}' />
+                                    <b>
+                                        {% if task.title|length > 35 %}
+                                            {{ task.title|slice:"0:35" }}...
+                                        {% else %}
+                                            {{ task.title }}
+                                        {% endif %}
+                                    </b>
+                                </div>
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- COMPLETED -->
+            <div id='COMPLETED_body' class="card-body">
+                <div class="d-flex">
+                    <h4 style="padding-right: 5px;">Completed</h4>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                      </svg>
+                </div>
+                
+                <!-- <h4>Completed ({{ status_counts.COMPLETED }})</h4> -->
+                <hr>
+                <div id="COMPLETED" class="status-list card-body overflow-auto" data-status="COMPLETED" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2">
+                    {% for task in tasks %}
+                        {% if task.status == "COMPLETED" %}
+                        <div class="card mb-3 task-item" data-id="{{ task.id }}">
+                            <a href="javascript:void(0);" class="task-link" data-url="{% url 'items_detail' task.pk %}">
+                                <div class="card-body">
+                                    <input type='hidden' name='item' value='{{ task.id }}' />
+                                    <input type='hidden' name='status' value='{{ task.status }}' />
+                                    <b>
+                                        {% if task.title|length > 35 %}
+                                            {{ task.title|slice:"0:35" }}...
+                                        {% else %}
+                                            {{ task.title }}
+                                        {% endif %}
+                                    </b>
+                                </div>
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+        </div>
+    </form>
+</div>
+
+
+<style>
+    .mb-5 {
+        margin-bottom: 4rem !important; /* This is equivalent to 80px */
+    }
+    #transparent-btn {
+        opacity: 0.7;
+    }
+    #sidebarRight, #sidebarRight2 {
+        width: 45% !important;
+    }
+</style>
+<button class="btn btn-secondary position-fixed bottom-0 end-0 mb-5 me-3" id="transparent-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight" aria-controls="sidebarRight">
+    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" class="bi bi-caret-left" viewBox="0 0 16 16">
+        <path d="M10 12.796V3.204L4.519 8 10 12.796zm-.659.753-5.48-4.796a1 1 0 0 1 0-1.506l5.48-4.796A1 1 0 0 1 11 3.204v9.592a1 1 0 0 1-1.659.753z"/>
+    </svg>
+</button>
+<!-- Sidebar Content Create Task -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarRight" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+    <h5 id="sidebarLabel">Create Task</h5>
+
+    <a type="button" class="text-reset" data-bs-dismiss="offcanvas" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+            <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
+          </svg>
+    </a>
+      
+      
+    </div>
+    <div class="offcanvas-body">
+        <div class="container-fluid full-height">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form_task.media }}
+                    <div class="form-group">
+                        {{ form_task.title }}
+                    </div>
+                    <div class="form-group">
+                        {{ form_task.completion_time }}
+                    </div>
+                    {{ form_task.description }}
+                    <input type="submit" value="Save Changes" class="btn btn-primary">
+                    <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar Content View Task -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarRight2" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+    <p id="sidebarLabel">Task</p>
+    <a type="button" class="text-reset" data-bs-dismiss="offcanvas" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+            <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
+          </svg>
+    </a>
+    </div>
+    <div class="offcanvas-body">
+        <div class="container-fluid full-height">
+            <div class="task-detail">
+
+                <!-- task detail will display here (dynamicly loaded) -->
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#id_description').summernote();
+    });
+    
+    $(document).ready(function(){
+        $(".task-link").click(function(event){
+            event.preventDefault();  // prevent the default action
+            var detailUrl = $(this).data('url'); // Get the URL from the data attribute
+            $.ajax({
+                url: detailUrl,
+                success: function(result){
+                    $(".task-detail").html(result);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Error:", textStatus, errorThrown); // Print the error to the console
+                }
+            });
+        });
+    });
+    // This function is triggered when the page loads or when new content is loaded by htmx.
+    htmx.onLoad(function (content) {
+
+        // Select all elements with the class "status-list". These are the lists of tasks.
+        var sortables = content.querySelectorAll(".status-list");
+
+        // Loop through each status list.
+        for (var i = 0; i < sortables.length; i++) {
+
+            // Initialize the Sortable library on each status list.
+            new Sortable(sortables[i], {
+
+                // Group name for shared lists. This allows tasks to be dragged between different status lists.
+                group: 'shared',
+
+                // Duration of the drag-and-drop animation in milliseconds.
+                animation: 150,
+
+                // CSS class applied to the dragged item while it's being moved.
+                ghostClass: 'blue-background-class',
+
+                // Event triggered when an item is moved within the same list.
+                onUpdate: function (evt) {
+
+                    // Get the status of the list the task was moved to.
+                    var newStatus = evt.to.getAttribute('data-status');
+
+                    // Find the hidden input field for the task's status.
+                    var statusInput = evt.item.querySelector('input[name="status"]');
+
+                    // Update the task's status input field with the new status.
+                    statusInput.value = newStatus;
+
+                    // Log the updated status for debugging purposes.
+                    console.log("onUpdate - Updated status:", newStatus);
+
+                    // Trigger the hx-post request to send the updated order and status to the server.
+                    htmx.trigger(evt.item, 'htmx:send');
+                },
+
+                // Event triggered when an item is moved to a different list.
+                onAdd: function (evt) {
+
+                    // Get the status of the list the task was moved to.
+                    var newStatus = evt.to.getAttribute('data-status');
+
+                    // Find the hidden input field for the task's status.
+                    var statusInput = evt.item.querySelector('input[name="status"]');
+
+                    // Update the task's status input field with the new status.
+                    statusInput.value = newStatus;
+
+                    // Log the updated status for debugging purposes.
+                    console.log("onAdd - Updated status:", newStatus);
+
+                    // Trigger the hx-post request to send the updated order and status to the server.
+                    htmx.trigger(evt.item, 'htmx:send');
+                }
+            });
+        }
+    });
+
+    let countdown;
+    let timeLeft = 1500; // 25 minutes in seconds
+    let isPaused = false;
+
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    }
+
+    function startCountdown() {
+
+        startButton();
+        // If timer is paused, resume it
+        if (isPaused) {
+            isPaused = false;
+            return;
+        }
+
+        // Clear any existing intervals
+        clearInterval(countdown);
+
+        // Reset timeLeft to 1500 seconds (25 minutes) if timer is not paused
+        if (!isPaused) {
+            timeLeft = 1500;
+            document.getElementById('timer').textContent = formatTime(timeLeft);
+        }
+
+        countdown = setInterval(function() {
+            if (isPaused) return;
+
+            timeLeft--;
+            document.getElementById('timer').textContent = formatTime(timeLeft);
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                // Play the bell sound
+                document.getElementById('bellSound').play();
+                alert('Time is up!');
+            }
+        }, 1000);
+    }
+
+    function pauseCountdown() {
+        isPaused = !isPaused;
+
+        var sound = document.getElementById("clickSound");
+        var button = document.getElementById("toggleButton");
+
+        sound.play(); // Play the sound effect
+
+        if (button.innerHTML === "Pause") {
+            button.innerHTML = "Unpause";
+        } else {
+            button.innerHTML = "Pause";
+        }
+    }
+
+    function startButton() {
+        var sound = document.getElementById("start_button_click");
+        var button = document.getElementById("start_button");
+        sound.play();
+
+        if (button.innerHTML === "Start") {
+            button.innerHTML = "Started";
+        } else {
+            button.innerHTML = 'Start';
+        }
+    }
+
+</script>
+{% endblock %}
