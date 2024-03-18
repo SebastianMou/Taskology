@@ -19,13 +19,9 @@ from .forms import TaskForm, UserRegisterForm
 # Create your views here.
 @login_required
 def home(request):
-    all_tasks = Task.objects.order_by('position')
-    tasks = all_tasks.filter(owner=request.user)
-    task_count = tasks.count()
-
-    status_counts = {}
-    for status, _ in Task.STATUS_CHOICES:
-        status_counts[status] = tasks.filter(status=status).count()
+    all_tasks = Task.objects.order_by('position').filter(owner=request.user)
+    task_count = all_tasks.count()
+    status_counts = {status: all_tasks.filter(status=status).count() for status, _ in Task.STATUS_CHOICES}
 
     if request.method == 'POST':
         form_task = TaskForm(request.POST)
@@ -33,16 +29,22 @@ def home(request):
             task = form_task.save(commit=False)
             task.owner = request.user
             task.save()
-            return redirect('home')
-    else: 
-        form_task = TaskForm(request.POST)
+            if request.headers.get('HX-Request', 'false').lower() == 'true':
+                tasks = all_tasks
+                return render(request, 'partials/_task_list.html', {'tasks': tasks})
+            else:
+                return redirect('home')
+    else:
+        form_task = TaskForm()
+
     context = {
-        'tasks': tasks,
+        'tasks': all_tasks,
         'task_count': task_count,
         'status_counts': status_counts,
         'form_task': form_task,
     }
     return render(request, 'home.html', context)
+
 
 # @login_required
 # def tasks(request):

@@ -1,6 +1,7 @@
 {% extends './base.html' %}
 {% load static %}
 {% block content %}
+
 <script src="{% static 'tinymce/tinymce.min.js' %}"></script>
 <style>
     .full-height {
@@ -151,6 +152,9 @@
                 <!-- <h4>Not Started ({{ status_counts.NOT_STARTED }})</h4> -->
                 <hr>
                 <div id="not_started" class="status-list card-body overflow-auto" data-status="NOT_STARTED" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2">
+                    <div id="response">
+                        <!-- all the response here -->
+                    </div>
                     {% for task in tasks %}
                         {% if task.status == "NOT_STARTED" %}
                         <div class="card mb-2 task-item" data-id="{{ task.id }}">
@@ -172,6 +176,7 @@
                     {% endfor %}
                 </div>
             </div>
+
     
             <!-- IN_PROGRESS -->
             <div id="in_progress_body" class="card-body">
@@ -278,7 +283,7 @@
     </div>
     <div class="offcanvas-body">
         <div class="container-fluid full-height">
-                <form method="POST">
+                <form method="POST" hx-post="{% url 'home' %}" hx-target="#response" hx-swap="outerHTML">
                     {% csrf_token %}
                     {{ form_task.media }}
                     <div class="form-group">
@@ -288,12 +293,32 @@
                         {{ form_task.completion_time }}
                     </div>
                     {{ form_task.description }}
-                    <input type="submit" value="Save Changes" class="btn btn-primary">
+                    <input type="submit" value="Save" class="btn btn-primary">
                     <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
                 </form>
         </div>
     </div>
 </div>
+
+<script>
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     document.getElementById('clearForm').addEventListener('click', function() {
+    //         // Find the form element
+    //         var form = this.closest('form');
+            
+    //         // Reset input and textarea fields
+    //         form.querySelectorAll('input[type="text"], input[type="datetime-local"], textarea').forEach(function(input) {
+    //             input.value = '';
+    //         });
+    
+    //         // Clear TinyMCE editor
+    //         if (tinyMCE.activeEditor) {
+    //             tinyMCE.activeEditor.setContent('');
+    //         }
+    //     });
+    // });
+</script>
+    
 
 <!-- Sidebar Content View Task -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarRight2" aria-labelledby="sidebarLabel">
@@ -314,6 +339,8 @@
         </div>
     </div>
 </div>
+<script src="https://unpkg.com/htmx.org"></script>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {

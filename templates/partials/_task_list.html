@@ -1,0 +1,19 @@
+{% for task in tasks %}
+    {% if task.status == "NOT_STARTED" %}
+    <div class="card mb-2 task-item" data-id="{{ task.id }}">
+        <a href="javascript:void(0);" class="task-link" data-url="{% url 'items_detail' task.pk %}">
+            <div class="card-body">
+                <input type='hidden' name='item' value='{{ task.id }}' />
+                <input type='hidden' name='status' value='{{ task.status }}' />
+                <b>
+                    {% if task.title|length > 35 %}
+                        {{ task.title|slice:"0:35" }}...
+                    {% else %}
+                        {{ task.title }}
+                    {% endif %}
+                </b>
+            </div>
+        </a>
+    </div>
+    {% endif %}
+{% endfor %}
