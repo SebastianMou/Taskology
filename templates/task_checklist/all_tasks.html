@@ -1,0 +1,239 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://unpkg.com/htmx.org"></script>
+
+<style>
+    .my_day {
+        background: rgb(78,115,208);
+        background: linear-gradient(90deg, rgba(78,115,208,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
+        height: 132px;
+        display: flex;
+        align-items: flex-end;
+    }
+    .padd {
+        padding: 8px;
+    }
+    .padd h3 {
+        margin-top: 0; 
+        margin-bottom: 4px; 
+        font-weight: bolder;
+        color: white;        
+    }
+    .padd p {
+        margin-top: 0; 
+        color: white;
+    }
+
+    .link-container {
+        margin-right: auto;
+        display: flex;
+        justify-content: flex-end;
+    }
+    .task-link {
+        margin-left: 30px;
+    }
+
+    .custom-col {
+        flex: 0 0 auto;
+        width: 25px;
+    }
+    .underline-input {
+        width: 100%; 
+        border: none;
+        border-bottom: 1px solid rgba(128, 128, 128, 0.486); 
+        box-shadow: none;
+        outline: none;
+        padding-bottom: 4px;
+    }
+    .form-group {
+        margin-bottom: 18px; /* Adds space between form groups */
+    }
+</style>
+<div class="my_day">
+    <div class="padd">
+        <h3>sebastina</h3>
+        <p>this is a test</p>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Status</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Date Created</th>
+                    <th scope="col">Actions</th>
+                    <th scope="col" style="width: 100px;" class="text-end"></th>
+                </tr>
+            </thead>
+            <tbody id="sortable-tbody">
+                <div id="tasks-list">
+                    {% for task in all_tasks %}
+                        <tr>
+                            <td>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                </svg>
+                            </td>
+                            <td class="task-link" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2" data-url="{% url 'items_detail' task.pk %}">{{ task.title }}</td>
+                            <td>{{ task.created_at }}</td>
+                            <td>{{ task.status }}</td>
+                            <td class="text-end">
+                                <div class="link-container">
+                                    <div class="dropdown">
+                                        <button class="btn btn-link" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
+                                            <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+                                        </svg>
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'edit_task_ck' task.pk %}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                                                        <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
+                                                    </svg> Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'delete_task_ck' task.pk %}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                                    </svg> Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        
+                                    </div>
+                                    
+                                </div>
+                            </td>
+                        </tr>
+                        
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No tasks found</td>
+                    </tr>
+                    {% endfor %}
+                </div>
+            </tbody>
+        </table>
+        <tr>
+            <div class="add-task">
+                <a href="">
+                    
+                </a>
+                <a href="#" id="load-upload-btn" class="btn btn-info" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight" aria-controls="sidebarRight">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                      </svg>
+                    <b>Add Task</b>
+                </a>
+            </div>
+        </tr>
+    </div>
+</div>
+<style>
+    .mb-5 {
+        margin-bottom: 4rem !important; /* This is equivalent to 80px */
+    }
+    #transparent-btn {
+        opacity: 0.7;
+    }
+    #sidebarRight, #sidebarRight2 {
+        width: 45% !important;
+    }
+    @media all and (max-width: 768px) {
+        #sidebarRight, #sidebarRight2 {
+            width: 95% !important;
+        }
+    }
+</style>
+<!-- Sidebar Content Create Task -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarRight" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+    <h5 id="sidebarLabel">Create Task</h5>
+
+    <a type="button" class="text-reset" data-bs-dismiss="offcanvas" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+            <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
+          </svg>
+    </a>
+      
+    </div>
+    <div class="offcanvas-body">
+        <div class="container-fluid full-height">
+                <form method="POST" hx-post="{% url 'all_tasks' %}" hx-target="#sortable-tbody" hx-swap="outerHTML">
+                    {% csrf_token %}
+                    {{ form_task.media }}
+                    <div class="form-group">
+                        {{ form_task.title }}
+                    </div>
+                    <div class="form-group">
+                        {{ form_task.completion_time }}
+                    </div>
+                    {{ form_task.description }}
+                    <br>
+                    <input type="submit" value="Save Changes" class="btn btn-primary">
+                    <a href="" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar Content View Task -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarRight2" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+    <p id="sidebarLabel">Task</p>
+    <a type="button" class="text-reset" data-bs-dismiss="offcanvas" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+            <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
+        </svg>
+    </a>
+    </div>
+    <div class="offcanvas-body">
+        <div class="container-fluid full-height">
+            <div class="task-detail">
+                <!-- task detail will display here (dynamicly loaded) -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+
+<script src="path/to/sortable.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var el = document.getElementById('sortable-tbody');
+        var sortable = new Sortable(el, {
+            animation: 150, // Animation speed
+            ghostClass: 'bg-light', // Class name for the drop placeholder
+            onEnd: function (/**Event*/evt) {
+                // Implement server update logic here, if necessary
+            },
+        });
+    });
+
+    $(document).ready(function(){
+        $(".task-link").click(function(event){
+            event.preventDefault();  // prevent the default action
+            var detailUrl = $(this).data('url'); // Get the URL from the data attribute
+            $.ajax({
+                url: detailUrl,
+                success: function(result){
+                    $(".task-detail").html(result);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Error:", textStatus, errorThrown); // Print the error to the console
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

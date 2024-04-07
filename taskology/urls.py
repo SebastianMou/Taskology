@@ -27,6 +27,11 @@ urlpatterns = [
     path('delete_task/<int:pk>/', views.delete_task, name='delete_task'),
     path('edit_task/<int:pk>/', views.edit_task, name='edit_task'),
 
+    # tasks check list
+    path('all_tasks/', views.all_tasks, name='all_tasks'),
+    path('delete_task_ck/<int:pk>/', views.delete_task_ck, name='delete_task_ck'),
+    path('edit_task_ck/<int:pk>/', views.edit_task_ck, name='edit_task_ck'),
+
     path('notifications/', views.all_notifications, name='all_notifications'),
     path('notification/<int:pk>/', views.notification_detail, name='notification_detail'),
 

@@ -22,6 +22,7 @@ def home(request):
     all_tasks = Task.objects.order_by('position').filter(owner=request.user)
     task_count = all_tasks.count()
     status_counts = {status: all_tasks.filter(status=status).count() for status, _ in Task.STATUS_CHOICES}
+    form_submitted = False  # Initialize the flag
 
     if request.method == 'POST':
         form_task = TaskForm(request.POST)
@@ -31,9 +32,12 @@ def home(request):
             task.save()
             if request.headers.get('HX-Request', 'false').lower() == 'true':
                 tasks = all_tasks
+                # For HTMX requests, render the partial template without setting form_submitted to True
                 return render(request, 'partials/_task_list.html', {'tasks': tasks})
             else:
+                # For non-HTMX requests, redirect to 'home' which causes a full page reload
                 return redirect('home')
+        # If the form is not valid, fall through to render the page with the form errors
     else:
         form_task = TaskForm()
 
@@ -42,36 +46,9 @@ def home(request):
         'task_count': task_count,
         'status_counts': status_counts,
         'form_task': form_task,
+        'form_submitted': form_submitted,  # This remains False for GET requests and invalid POST requests
     }
     return render(request, 'home.html', context)
-
-
-# @login_required
-# def tasks(request):
-#     all_tasks = Task.objects.order_by('position')
-#     tasks = all_tasks.filter(owner=request.user)
-#     task_count = tasks.count()
-
-#     status_counts = {}
-#     for status, _ in Task.STATUS_CHOICES:
-#         status_counts[status] = tasks.filter(status=status).count()
-
-#     if request.method == 'POST':
-#         form_task = TaskForm(request.POST)
-#         if form_task.is_valid():
-#             task = form_task.save(commit=False)
-#             task.owner = request.user
-#             task.save()
-#             return redirect('tasks')
-#     else: 
-#         form_task = TaskForm(request.POST)
-#     context = {
-#         'tasks': tasks,
-#         'task_count': task_count,
-#         'status_counts': status_counts,
-#         'form_task': form_task,
-#     }
-#     return render(request, 'task/tasks_test.html', context)
 
 def update_task_order(request):
     """
@@ -159,11 +136,9 @@ def notification_detail(request, pk):
     notification = get_object_or_404(CompanyNotification, pk=pk)
     return render(request, 'company/notification_detail.html', {'notification': notification})
 
-
 def user_login(request):
     if request.user.is_authenticated:
         return redirect('home')
-
     
     if request.method == 'POST':
         username = request.POST["username"]
@@ -266,3 +241,55 @@ def public_privacy_policy(request):
 
 def public_terms_of_service(request):
     return render(request, 'legal/public_terms_of_service.html')
+
+def all_tasks(request):
+    all_tasks = Task.objects.filter(owner=request.user)
+    if request.method == 'POST':
+        form_task = TaskForm(request.POST)
+        if form_task.is_valid():
+            task = form_task.save(commit=False)
+            task.owner = request.user
+            task.save()
+            if "HX-Request" in request.headers:
+                # This is an HTMX request; return updated tasks list
+                html = render_to_string('task_checklist/_tasks_list.html', {'all_tasks': Task.objects.filter(owner=request.user)}, request=request)
+                return HttpResponse(html)
+            else:
+                # For non-HTMX requests, redirect as usual
+                return redirect('all_tasks')
+    else:
+        form_task = TaskForm()
+    
+    context = {
+        'all_tasks': all_tasks,
+        'form_task': form_task,
+    }
+    return render(request, 'task_checklist/all_tasks.html', context)
+
+@login_required
+def delete_task_ck(request, pk):
+    task = get_object_or_404(Task, id=pk, owner=request.user)
+    if request.method == 'POST':
+        task.delete()
+        return redirect('all_tasks')
+    context = {
+        'task': task,
+    }
+    return render(request, 'task/confirm_delete.html', context)
+    
+@login_required
+def edit_task_ck(request, pk):
+    task = get_object_or_404(Task, id=pk, owner=request.user)
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('all_tasks') 
+    else:
+        form = TaskForm(instance=task) 
+    
+    context = {
+        'form': form,
+        'task': task,
+    }
+    return render(request, 'task/edit_task.html', context)

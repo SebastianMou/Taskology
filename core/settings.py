@@ -42,10 +42,6 @@ INSTALLED_APPS = [
     'taskology'
 ]
 
-
-
-
-
 TINYMCE_DEFAULT_CONFIG = {
     'height': 660,
     'width': 'auto',
@@ -135,6 +131,8 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+APPEND_SLASH = False
 
 LOGIN_URL = 'user_login'
 LOGOUT_URL = 'user_logout'

@@ -21,6 +21,9 @@ class Task(models.Model):
     def __str__(self) -> str:
         return str(self.title) + ' - ' + str(self.owner) + ' - ' + str(self.created_at)
 
+    class Meta:
+        verbose_name_plural = 'tasks'
+    
 class CompanyNotification(models.Model):
     title = models.CharField(max_length=255)
     description = HTMLField(blank=True, null=True)
