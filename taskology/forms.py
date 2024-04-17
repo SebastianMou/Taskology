@@ -43,7 +43,7 @@ class TaskForm(forms.ModelForm):
         })
     )
 
-    description = forms.CharField(widget=TinyMCE(attrs={'cols': 80, 'rows': 30}))
+    description = forms.CharField(widget=TinyMCE(attrs={'cols': 80, 'rows': 30}), required=False)
 
     class Meta:
         model = Task
