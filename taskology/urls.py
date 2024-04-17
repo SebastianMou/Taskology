@@ -26,6 +26,7 @@ urlpatterns = [
     path('items_detail/<int:pk>/', views.items_detail, name='items_detail'),
     path('delete_task/<int:pk>/', views.delete_task, name='delete_task'),
     path('edit_task/<int:pk>/', views.edit_task, name='edit_task'),
+    path('delete_all_tasks/', views.delete_all_tasks, name='delete_all_tasks'),
 
     # tasks check list
     path('all_tasks/', views.all_tasks, name='all_tasks'),

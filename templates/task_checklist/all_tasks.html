@@ -57,6 +57,33 @@
         <p>this is a test</p>
     </div>
 </div>
+
+<button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    Delete all
+</button>
+  
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-body">
+            
+            <p style="color: red;"><b>WARNING:</b> <w style="color: black;">This will delete all your tasks permanently. Are you sure you want to proceed?"</w> </p>
+            <form method="POST" action="{% url 'delete_all_tasks' %}">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit">Confirm Delete All</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                      </svg>
+                </button>
+            </form>
+            
+        </div>
+    </div>
+</div>
+</div>
+
 <div class="card">
     <div class="card-body">
         <table class="table">
@@ -70,7 +97,7 @@
                 </tr>
             </thead>
             <tbody id="sortable-tbody">
-                <div id="tasks-list">
+                <div>
                     {% for task in all_tasks %}
                         <tr>
                             <td>
@@ -111,7 +138,6 @@
                                 </div>
                             </td>
                         </tr>
-                        
                     {% empty %}
                     <tr>
                         <td colspan="4" class="text-center">No tasks found</td>
@@ -122,9 +148,6 @@
         </table>
         <tr>
             <div class="add-task">
-                <a href="">
-                    
-                </a>
                 <a href="#" id="load-upload-btn" class="btn btn-info" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight" aria-controls="sidebarRight">
                     <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
@@ -165,7 +188,7 @@
     </div>
     <div class="offcanvas-body">
         <div class="container-fluid full-height">
-                <form method="POST" hx-post="{% url 'all_tasks' %}" hx-target="#sortable-tbody" hx-swap="outerHTML">
+                <form id="taskForm" method="POST" action="{% url 'all_tasks' %}">
                     {% csrf_token %}
                     {{ form_task.media }}
                     <div class="form-group">
@@ -177,7 +200,7 @@
                     {{ form_task.description }}
                     <br>
                     <input type="submit" value="Save Changes" class="btn btn-primary">
-                    <a href="" class="btn btn-secondary">Cancel</a>
+                    <a href="{% url 'all_tasks' %}" class="btn btn-secondary">Cancel</a>
                 </form>
             </div>
         </div>
@@ -219,6 +242,26 @@
         });
     });
 
+    // Dynamic loading
+    $(document).ready(function() {
+        $("#taskForm").submit(function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            var formData = $(this).serialize(); // Serialize the form data
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'all_tasks' %}",
+                data: formData,
+                success: function(response) {
+                    $('#sortable-tbody').html(response); // Update the task list
+                },
+                error: function() {
+                    alert('Error updating tasks.');
+                }
+            });
+        });
+    });
+
     $(document).ready(function(){
         $(".task-link").click(function(event){
             event.preventDefault();  // prevent the default action
@@ -234,6 +277,7 @@
             });
         });
     });
+
 </script>
 
 {% endblock %}

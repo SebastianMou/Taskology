@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
@@ -108,6 +109,22 @@ def delete_task(request, pk):
         'task': task,
     }
     return render(request, 'task/confirm_delete.html', context)
+
+@login_required
+def delete_all_tasks(request):
+    if request.method == 'POST':
+        # Fetch all tasks owned by the logged-in user
+        tasks = Task.objects.filter(owner=request.user)
+        task_count = tasks.count()
+
+        # Delete all fetched tasks
+        tasks.delete()
+
+        # return HttpResponse(f"Deleted {task_count} tasks.", status=200)
+        return redirect('all_tasks')
+    else:
+        # If not POST, maybe show a confirmation page or simply redirect
+        return redirect('all_tasks')
 
 @login_required
 def edit_task(request, pk):
@@ -250,16 +267,14 @@ def all_tasks(request):
             task = form_task.save(commit=False)
             task.owner = request.user
             task.save()
-            if "HX-Request" in request.headers:
-                # This is an HTMX request; return updated tasks list
-                html = render_to_string('task_checklist/_tasks_list.html', {'all_tasks': Task.objects.filter(owner=request.user)}, request=request)
-                return HttpResponse(html)
-            else:
-                # For non-HTMX requests, redirect as usual
-                return redirect('all_tasks')
+            # After saving, return only the fragment of the page that needs updating
+            tasks_html = render_to_string('task_checklist/_tasks_list.html', {'all_tasks': all_tasks}, request=request)
+            return HttpResponse(tasks_html)
+        else:
+            return HttpResponse("Form is not valid", status=400)
     else:
         form_task = TaskForm()
-    
+
     context = {
         'all_tasks': all_tasks,
         'form_task': form_task,
@@ -276,7 +291,7 @@ def delete_task_ck(request, pk):
         'task': task,
     }
     return render(request, 'task/confirm_delete.html', context)
-    
+
 @login_required
 def edit_task_ck(request, pk):
     task = get_object_or_404(Task, id=pk, owner=request.user)
