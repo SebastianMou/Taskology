@@ -27,24 +27,29 @@ class UserRegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
-
 class TaskForm(forms.ModelForm):
     title = forms.CharField(widget=forms.TextInput(attrs={
         'class': 'underline-input',
         'placeholder': 'Task Title',
     }))
-
-    completion_time = forms.DateTimeField(
+    completion_date = forms.DateField(
         required=False,
-        widget=forms.DateTimeInput(attrs={
+        widget=forms.DateInput(attrs={
             'class': 'underline-input',
-            'type': 'datetime-local',
-            'placeholder': 'YYYY-MM-DD HH:MM:SS',
+            'type': 'date',
+            'placeholder': 'YYYY-MM-DD',
         })
     )
-
+    completion_time = forms.TimeField(
+        required=False,
+        widget=forms.TimeInput(attrs={
+            'class': 'underline-input',
+            'type': 'time',
+            'placeholder': 'HH:MM:SS',
+        })
+    )
     description = forms.CharField(widget=TinyMCE(attrs={'cols': 80, 'rows': 30}), required=False)
 
     class Meta:
         model = Task
-        fields = ['title', 'completion_time', 'description']
+        fields = ['title', 'completion_date', 'completion_time', 'description']

@@ -1,16 +1,68 @@
 <!-- _tasks_list.html -->
 {% load static %}
+
 {% for task in all_tasks %}
-    <tr>
+<tr>
+    {% if task.status != 'COMPLETED' %}
+        <td id="element">
+            <form action="{% url 'complete_task' task.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                    </svg>
+                </button>
+            </form>
+        </td>
         <td>
-            <i class="bi bi-circle"></i>
+            <div class="flex-container">
+                <form action="{% url 'complete_task' task.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link">
+                        <svg id="element-on-mobile" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                        </svg> 
+                    </button>
+                </form>
+                <p class="task-link" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2" data-url="{% url 'items_detail' task.pk %}">{{ task.title }}</p>
+            </div>
         </td>
-        <td class="task-link" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2" data-url="{% url 'items_detail' task.pk %}">
-            {{ task.title }}
+    {% else %}
+        <td id="element">
+            <form action="{% url 'complete_task' task.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check2-circle" viewBox="0 0 16 16">
+                        <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
+                        <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
+                      </svg>
+                </button>
+            </form>
         </td>
-        <td>{{ task.created_at }}</td>
-        <td>{{ task.get_status_display }}</td>
-        <td class="text-end">
+        <td>
+            <div class="flex-container">
+                <form action="{% url 'complete_task' task.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link"> 
+                        <svg id="element-on-mobile" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check2-circle" viewBox="0 0 16 16">
+                            <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
+                            <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
+                          </svg>
+                    </button>
+                </form>
+                <s class="task-link" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2" data-url="{% url 'items_detail' task.pk %}">{{ task.title }}</s>
+            </div>
+        </td>
+    {% endif %}
+    
+    <td id="element">{{ task.created_at }}</td>
+    {% if task.status != 'COMPLETED' %}
+        <td id="element"><span class="badge bg-info text-dark">{{ task.status }}</span></td>
+    {% else %}
+        <td id="element"><span class="badge bg-success text-dark">{{ task.status }}</span></td>
+    {% endif %}
+    <td id="element" class="text-end">
+        <div class="link-container">
             <div class="dropdown">
                 <button class="btn btn-link" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
@@ -33,12 +85,49 @@
                         </a>
                     </li>
                 </ul>
-                
             </div>
-        </td>
-    </tr>
+        </div>
+    </td>
+</tr>
 {% empty %}
     <tr>
         <td colspan="4" class="text-center">No tasks found</td>
     </tr>
 {% endfor %}
+
+<!-- Sidebar Content View Task -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarRight2" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+    <p id="sidebarLabel">Task</p>
+    <a type="button" class="text-reset" data-bs-dismiss="offcanvas" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+            <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
+        </svg>
+    </a>
+    </div>
+    <div class="offcanvas-body">
+        <div class="container-fluid full-height">
+            <div class="task-detail">
+                <!-- task detail will display here (dynamicly loaded) -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+     $(document).ready(function(){
+        $(".task-link").click(function(event){
+            event.preventDefault();  // prevent the default action
+            var detailUrl = $(this).data('url'); // Get the URL from the data attribute
+            $.ajax({
+                url: detailUrl,
+                success: function(result){
+                    $(".task-detail").html(result);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Error:", textStatus, errorThrown); // Print the error to the console
+                }
+            });
+        });
+    });
+</script>

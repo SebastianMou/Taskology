@@ -259,6 +259,7 @@ def public_privacy_policy(request):
 def public_terms_of_service(request):
     return render(request, 'legal/public_terms_of_service.html')
 
+@login_required
 def all_tasks(request):
     all_tasks = Task.objects.filter(owner=request.user)
     if request.method == 'POST':
@@ -282,15 +283,20 @@ def all_tasks(request):
     return render(request, 'task_checklist/all_tasks.html', context)
 
 @login_required
+def complete_task(request, task_id):
+    task = get_object_or_404(Task, pk=task_id, owner=request.user)
+    if task.status == 'COMPLETED':
+        task.status = 'NOT_STARTED'
+    else:
+        task.status = 'COMPLETED'
+    task.save()
+    return redirect('all_tasks')
+
+@login_required
 def delete_task_ck(request, pk):
-    task = get_object_or_404(Task, id=pk, owner=request.user)
-    if request.method == 'POST':
-        task.delete()
-        return redirect('all_tasks')
-    context = {
-        'task': task,
-    }
-    return render(request, 'task/confirm_delete.html', context)
+    task = Task.objects.get(id=pk, owner=request.user)
+    task.delete()
+    return redirect('all_tasks')
 
 @login_required
 def edit_task_ck(request, pk):

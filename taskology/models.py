@@ -10,7 +10,8 @@ class Task(models.Model):
         ('COMPLETED', 'Completed'),
     ]
     title = models.CharField(max_length=255)
-    completion_time = models.DateTimeField(null=True, blank=True)
+    completion_date = models.DateField(null=True, blank=True)  # Separate date field
+    completion_time = models.TimeField(null=True, blank=True)  # Separate time field
     description = HTMLField(blank=True, null=True)
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='NOT_STARTED')
     created_at = models.DateTimeField(auto_now_add=True)
