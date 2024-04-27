@@ -34,6 +34,7 @@ urlpatterns = [
     path('edit_task_ck/<int:pk>/', views.edit_task_ck, name='edit_task_ck'),
     path('complete-task/<int:task_id>/', views.complete_task, name='complete_task'),
 
+
     path('notifications/', views.all_notifications, name='all_notifications'),
     path('notification/<int:pk>/', views.notification_detail, name='notification_detail'),
 

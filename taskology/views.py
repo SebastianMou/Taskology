@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
@@ -283,6 +284,7 @@ def all_tasks(request):
     return render(request, 'task_checklist/all_tasks.html', context)
 
 @login_required
+@require_POST
 def complete_task(request, task_id):
     task = get_object_or_404(Task, pk=task_id, owner=request.user)
     if task.status == 'COMPLETED':
@@ -290,7 +292,7 @@ def complete_task(request, task_id):
     else:
         task.status = 'COMPLETED'
     task.save()
-    return redirect('all_tasks')
+    return JsonResponse({'status': task.status, 'task_id': task_id})
 
 @login_required
 def delete_task_ck(request, pk):

@@ -2,97 +2,55 @@
 {% load static %}
 
 {% for task in all_tasks %}
-<tr>
-    {% if task.status != 'COMPLETED' %}
-        <td id="element">
-            <form action="{% url 'complete_task' task.id %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle" viewBox="0 0 16 16">
-                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                    </svg>
-                </button>
-            </form>
-        </td>
-        <td>
-            <div class="flex-container">
-                <form action="{% url 'complete_task' task.id %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-link">
-                        <svg id="element-on-mobile" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle" viewBox="0 0 16 16">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                        </svg> 
-                    </button>
-                </form>
-                <p class="task-link" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2" data-url="{% url 'items_detail' task.pk %}">{{ task.title }}</p>
-            </div>
-        </td>
-    {% else %}
-        <td id="element">
-            <form action="{% url 'complete_task' task.id %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check2-circle" viewBox="0 0 16 16">
-                        <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
-                        <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
-                      </svg>
-                </button>
-            </form>
-        </td>
-        <td>
-            <div class="flex-container">
-                <form action="{% url 'complete_task' task.id %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-link"> 
-                        <svg id="element-on-mobile" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check2-circle" viewBox="0 0 16 16">
-                            <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
-                            <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
-                          </svg>
-                    </button>
-                </form>
-                <s class="task-link" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2" data-url="{% url 'items_detail' task.pk %}">{{ task.title }}</s>
-            </div>
-        </td>
-    {% endif %}
-    
-    <td id="element">{{ task.created_at }}</td>
-    {% if task.status != 'COMPLETED' %}
-        <td id="element"><span class="badge bg-info text-dark">{{ task.status }}</span></td>
-    {% else %}
-        <td id="element"><span class="badge bg-success text-dark">{{ task.status }}</span></td>
-    {% endif %}
-    <td id="element" class="text-end">
-        <div class="link-container">
-            <div class="dropdown">
-                <button class="btn btn-link" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+<tr id="task-row-{{ task.id }}">
+    <td>
+        <button type="button" class="btn btn-link toggle-task-status" data-task-id="{{ task.id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="{% if task.status != 'COMPLETED' %}bi bi-circle{% else %}bi bi-check2-circle{% endif %}" viewBox="0 0 16 16">
+                <!-- Insert the appropriate path based on whether the task is completed or not -->
+                {% if task.status != 'COMPLETED' %}
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                {% else %}
+                    <path d="M2.5 8a5.5 5.5 0 1 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a .5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
+                    <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
+                {% endif %}
+            </svg>
+        </button>
+    </td>
+    <td>
+        <div class="flex-container">
+            <p id="title-{{ task.id }}" class="task-link {% if task.status == 'COMPLETED' %}text-strikethrough{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2">
+                {{ task.title }}
+            </p>
+        </div>
+    </td>
+    <td>{{ task.created_at }}</td>
+    <td class="task-status">
+        <span class="badge {% if task.status != 'COMPLETED' %}bg-info text-dark{% else %}bg-success text-dark{% endif %}">
+            {{ task.status }}
+        </span>
+    </td>
+    <td class="text-end">
+        <div class="dropdown">
+            <button class="btn btn-link" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
                     <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
                 </svg>
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                    <li>
-                        <a class="dropdown-item" href="{% url 'edit_task_ck' task.pk %}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
-                                <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
-                            </svg> Edit
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="{% url 'delete_task_ck' task.pk %}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                            </svg> Delete
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                <li>
+                    <a class="dropdown-item" href="{% url 'edit_task_ck' task.pk %}">Edit</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'delete_task_ck' task.pk %}">Delete</a>
+                </li>
+            </ul>
         </div>
     </td>
 </tr>
 {% empty %}
-    <tr>
-        <td colspan="4" class="text-center">No tasks found</td>
-    </tr>
+<tr>
+    <td colspan="5" class="text-center">No tasks found</td>
+</tr>
 {% endfor %}
 
 <!-- Sidebar Content View Task -->
@@ -130,4 +88,43 @@
             });
         });
     });
+
+    $(document).ready(function() {
+        $('.toggle-task-status').on('click', function() {
+            var btn = $(this);
+            var taskId = btn.data('task-id');
+            var row = $('#task-row-' + taskId);
+            var titleElement = $('#title-' + taskId); // Ensure this ID is set correctly
+
+            $.ajax({
+                url: `/complete-task/${taskId}/`,
+                type: 'POST',
+                data: {
+                    csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
+                    task_id: taskId,
+                },
+                success: function(response) {
+                    // Update the icon based on the new status
+                    var newIconHtml = (response.status === 'COMPLETED') ?
+                        '<svg class="bi bi-check2-circle" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 1 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/></svg>' :
+                        '<svg class="bi bi-circle" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/></svg>';
+                    btn.html(newIconHtml);
+
+                    // Toggle strikethrough class based on status
+                    if (response.status === 'COMPLETED') {
+                        titleElement.addClass('text-strikethrough');
+                    } else {
+                        titleElement.removeClass('text-strikethrough');
+                    }
+
+                    // Update the status badge
+                    var newStatusBadgeHtml = (response.status === 'COMPLETED') ?
+                        '<span class="badge bg-success text-dark">COMPLETED</span>' :
+                        '<span class="badge bg-info text-dark">NOT_STARTED</span>';
+                    row.find('.task-status').html(newStatusBadgeHtml);
+                }
+            });
+        });
+    });
 </script>
+
