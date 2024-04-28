@@ -131,7 +131,7 @@
                             </td>
                             <td>
                                 <div class="flex-container">
-                                    <p id="title-{{ task.id }}" class="task-link {% if task.status is 'COMPLETED' %}text-strikethrough{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2" data-url="{% url 'items_detail' task.pk %}">
+                                    <p id="title-{{ task.id }}" class="task-link {% if task.status == 'COMPLETED' %}text-strikethrough{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2" data-url="{% url 'items_detail' task.pk %}">
                                         {{ task.title }}
                                     </p>
                                 </div>
@@ -160,7 +160,7 @@
                                 </div>
                             </td>
                         </tr>
-                        {% empty %}
+                    {% empty %}
                         <tr>
                             <td colspan="5" class="text-center">No tasks found</td>
                         </tr>
