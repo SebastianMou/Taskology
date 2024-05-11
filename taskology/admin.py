@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, CompanyNotification
+from .models import Task, CompanyNotification, SubTask
 
 # Register your models here.
 class TaskAdmin(admin.ModelAdmin):
@@ -37,3 +37,5 @@ class CompanyNotificationAdmin(admin.ModelAdmin):
 
 admin.site.register(Task, TaskAdmin)
 admin.site.register(CompanyNotification, CompanyNotificationAdmin)
+admin.site.register(SubTask)
+

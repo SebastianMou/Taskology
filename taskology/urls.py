@@ -28,11 +28,15 @@ urlpatterns = [
     path('edit_task/<int:pk>/', views.edit_task, name='edit_task'),
     path('delete_all_tasks/', views.delete_all_tasks, name='delete_all_tasks'),
 
+    path('dashboard/', views.dashboard, name='dashboard'),
+
     # tasks check list
     path('all_tasks/', views.all_tasks, name='all_tasks'),
     path('delete_task_ck/<int:pk>/', views.delete_task_ck, name='delete_task_ck'),
     path('edit_task_ck/<int:pk>/', views.edit_task_ck, name='edit_task_ck'),
     path('complete-task/<int:task_id>/', views.complete_task, name='complete_task'),
+
+    path('create_subtask/', views.create_subtask, name='create_subtask'),
 
 
     path('notifications/', views.all_notifications, name='all_notifications'),

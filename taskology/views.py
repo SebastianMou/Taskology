@@ -15,8 +15,8 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 
 from .tokens import account_activation_token
-from .models import Task, CompanyNotification
-from .forms import TaskForm, UserRegisterForm
+from .models import Task, CompanyNotification, SubTask
+from .forms import TaskForm, UserRegisterForm, SubTaskForm
 
 # Create your views here.
 @login_required
@@ -261,8 +261,13 @@ def public_terms_of_service(request):
     return render(request, 'legal/public_terms_of_service.html')
 
 @login_required
+def dashboard(request):
+    return render(request, 'authentication/dashboard.html')
+
+@login_required
 def all_tasks(request):
     all_tasks = Task.objects.filter(owner=request.user)
+    sub_tasks = SubTask.objects.filter(task__owner=request.user)
     if request.method == 'POST':
         form_task = TaskForm(request.POST)
         if form_task.is_valid():
@@ -280,8 +285,24 @@ def all_tasks(request):
     context = {
         'all_tasks': all_tasks,
         'form_task': form_task,
+        'sub_tasks': sub_tasks,
     }
     return render(request, 'task_checklist/all_tasks.html', context)
+
+@login_required
+def create_subtask(request):
+    if request.method == 'POST':
+        sub_form = SubTaskForm(request.POST)
+        if sub_form.is_valid():
+            subtask = sub_form.save(commit=False)
+            subtask.save()
+            return redirect('/')
+    else:
+        sub_form = SubTaskForm()  # Corrected variable name here for consistency
+    context = {
+        'sub_form': sub_form,  # Now sub_form is always defined before this line
+    }
+    return render(request, 'task_checklist/well_over.html', context)
 
 @login_required
 @require_POST

@@ -24,7 +24,24 @@ class Task(models.Model):
 
     class Meta:
         verbose_name_plural = 'tasks'
+
+class SubTask(models.Model):
+    # A reference to the parent task
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='subtasks')
     
+    # Basic subtask fields
+    title = models.CharField(max_length=255)
+    description = HTMLField(blank=True, null=True)
+    is_complete = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self) -> str:
+        return f"{self.title} - {self.task.title} - Complete: {'Yes' if self.is_complete else 'No'}"
+
+    class Meta:
+        verbose_name_plural = 'subtasks'
+
 class CompanyNotification(models.Model):
     title = models.CharField(max_length=255)
     description = HTMLField(blank=True, null=True)

@@ -1,0 +1,6 @@
+<form method="POST" action="{% url 'create_subtask' %}">
+    {% csrf_token %}
+    {{ sub_form.as_p }}
+    <input type="submit" value="Save Changes" class="btn btn-primary">
+    <a href="{% url 'all_tasks' %}" class="btn btn-secondary">Cancel</a>
+</form>

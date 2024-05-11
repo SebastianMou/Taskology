@@ -3,6 +3,8 @@
 
 {% block content %}
 <script src="https://unpkg.com/htmx.org"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 
 <style>
     .my_day {
@@ -116,7 +118,7 @@
                     {% for task in all_tasks %}
                         <tr id="task-row-{{ task.id }}">
                             <!-- display when on laptop -->
-                            <td style="width: 25px;" id="td-one">
+                            <td style="width: 25px; height: auto;" id="td-one">
                                 <button type="button" class="btn btn-link toggle-task-status" data-task-id="{{ task.id }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="{% if task.status != 'COMPLETED' %}bi bi-circle{% else %}bi bi-check2-circle{% endif %}" viewBox="0 0 16 16">
                                         <!-- Insert the appropriate path based on whether the task is completed or not -->
@@ -160,11 +162,31 @@
                                 </div>
                             </td>
                         </tr>
+                        {% for subtask in task.subtasks.all %}
+                            <tr>
+                                <td style="width: 25px;">
+                                    <td style="margin-bottom: 10px;">
+                                        <div class="d-flex">
+                                            <button type="button" class="btn btn-link toggle-task-status" data-task-id="{{ task.id }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="{% if task.status != 'COMPLETED' %}bi bi-circle{% else %}bi bi-check2-circle{% endif %}" viewBox="0 0 16 16">
+                                                        <path d="M2.5 8a5.5 5.5 0 1 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a .5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
+                                                        <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3 a.5.5 0 0 0 .708 0z"/>
+                                                </svg>
+                                            </button>
+                                            <p style="margin-left: 10px;">
+                                                {{ subtask.title }}
+                                            </p>
+                                        </div>
+                                    </td>
+                                </td>
+                            </tr>
+                        {% endfor %}
                     {% empty %}
                         <tr>
                             <td colspan="5" class="text-center">No tasks found</td>
                         </tr>
                     {% endfor %}
+
                 </div>
             </tbody>
         </table>
@@ -251,9 +273,28 @@
     </div>
 </div>
 
+<button class="btn btn-info" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight3" aria-controls="sidebarRight3">test</button>
+
+<!-- Sidebar Content View subform -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarRight3" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+    <p id="sidebarLabel">Subform</p>
+    <a type="button" class="text-reset" data-bs-dismiss="offcanvas" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+            <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
+        </svg>
+    </a>
+    </div>
+    <div class="offcanvas-body">
+        <div class="container-fluid full-height">
+            <!-- dinamilclly load the subtask forms here -->
+            <div id="form-container"></div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
 
 <script src="path/to/sortable.min.js"></script>
 
@@ -342,6 +383,19 @@
             });
         });
     });
+
+    $(document).ready(function(){
+            $.ajax({
+                url: '{% url "create_subtask" %}',  // Ensure the URL is correct
+                type: 'get',  // GET request to fetch the form
+                success: function(response){
+                    $('#form-container').html(response);  // Inject the form HTML into the page
+                },
+                error: function(xhr, status, error){
+                    console.log("Error: " + error);
+                }
+            });
+        });
 </script>
 
 {% endblock %}
