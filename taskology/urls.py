@@ -36,8 +36,9 @@ urlpatterns = [
     path('edit_task_ck/<int:pk>/', views.edit_task_ck, name='edit_task_ck'),
     path('complete-task/<int:task_id>/', views.complete_task, name='complete_task'),
 
-    path('create_subtask/', views.create_subtask, name='create_subtask'),
-
+    path('create_subtask/<int:task_id>/', views.create_subtask, name='create_subtask_for_task'),
+    path('subtask_detail/<int:pk>/', views.subtask_detail, name='subtask_detail'),
+    path('toggle_subtask_status/', views.toggle_subtask_status, name='toggle_subtask_status'),
 
     path('notifications/', views.all_notifications, name='all_notifications'),
     path('notification/<int:pk>/', views.notification_detail, name='notification_detail'),

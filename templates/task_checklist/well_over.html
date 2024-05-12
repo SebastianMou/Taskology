@@ -1,6 +1,59 @@
-<form method="POST" action="{% url 'create_subtask' %}">
-    {% csrf_token %}
-    {{ sub_form.as_p }}
-    <input type="submit" value="Save Changes" class="btn btn-primary">
-    <a href="{% url 'all_tasks' %}" class="btn btn-secondary">Cancel</a>
-</form>
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .underline-input {
+        width: 100%; 
+        border: none;
+        border-bottom: 3px solid rgba(128, 128, 128, 0.486); 
+        box-shadow: none;
+        outline: none;
+        padding-bottom: 4px;
+        padding: 12px;
+        border-radius: 5px;
+    }
+    .form-group {
+        margin-bottom: 18px; 
+    }
+</style>
+<div class="container-fluid full-height">
+    <div class="row">
+        <!-- Left Spacer Column -->
+        <div class="col-12 col-md-1">
+            <div class="card-body">
+                <!-- Left spacer content (if any) -->
+            </div>
+        </div>
+
+        <!-- Main Content Column -->
+        <div class="col-12 col-md-10">
+            <h2>Create SubTask for "{{ task.title }}"</h2>
+            <form method="post" action="{% url 'create_subtask_for_task' task.id %}">
+                {% csrf_token %}
+                {{ sub_form.media }}
+                <div class="form-group">
+                    <label for="id_title">Title:</label>
+                    {{ sub_form.title }}
+                </div>
+                <div class="form-group">
+                    <label for="id_description">Description:</label>
+                    {{ sub_form.description }}
+                </div>
+                <input type="hidden" name="task" value="{{ task.id }}">
+                <input class="btn btn-info" type="submit" value="Save SubTask">
+            </form>
+            
+            
+        </div>
+
+        <!-- Right Spacer Column -->
+        <div class="col-12 col-md-1">
+            <div class="card-body">
+                <!-- Right spacer content (if any) -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

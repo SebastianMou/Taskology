@@ -4,7 +4,7 @@
 {% for task in all_tasks %}
 <tr id="task-row-{{ task.id }}">
     <!-- display when on laptop -->
-    <td style="width: 25px;" id="td-one">
+    <td style="width: 25px; height: auto;" id="td-one">
         <button type="button" class="btn btn-link toggle-task-status" data-task-id="{{ task.id }}">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="{% if task.status != 'COMPLETED' %}bi bi-circle{% else %}bi bi-check2-circle{% endif %}" viewBox="0 0 16 16">
                 <!-- Insert the appropriate path based on whether the task is completed or not -->
@@ -48,6 +48,34 @@
         </div>
     </td>
 </tr>
+{% for subtask in task.subtasks.all %}
+    <tr>
+        <td style="width: 25px;">
+            <td style="margin-bottom: 10px;">
+                <div class="d-flex">
+                    <button type="button" class="btn btn-link toggle-task-status" data-subtask-id="{{ subtask.id }}" onclick="toggleSubtaskStatus(this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="{% if subtask.is_complete %}bi bi-check2-circle{% else %}bi bi-circle{% endif %}" viewBox="0 0 16 16">
+                            {% if subtask.is_complete %}
+                                <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
+                                <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
+                            {% else %}
+                                <path d="M8 15A7 7 0 1 1 8 1 a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0 a8 8 0 0 0 0 16"/>
+                            {% endif %}
+                        </svg>
+                    </button>
+                    <p class="subtask-link" data-url="{% url 'subtask_detail' subtask.pk %}" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight3" aria-controls="sidebarRight3" style="margin-left: 10px;">
+                        {% if subtask.is_complete %}
+                            <s>{{ subtask.title }}</s>
+                        {% else %}
+                            {{ subtask.title }}
+                        {% endif %}
+                    </p>
+                </div>
+            </td>
+        </td>
+    </tr>
+{% endfor %}
+
 {% empty %}
 <tr>
     <td colspan="5" class="text-center">No tasks found</td>
@@ -123,6 +151,44 @@
                         '<span class="badge bg-success text-dark">COMPLETED</span>' :
                         '<span class="badge bg-info text-dark">NOT_STARTED</span>';
                     row.find('.task-status').html(newStatusBadgeHtml);
+                }
+            });
+        });
+    });
+
+    function toggleSubtaskStatus(button) {
+        const subtaskId = button.getAttribute('data-subtask-id');
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch(`{% url 'toggle_subtask_status' %}?subtask_id=${subtaskId}`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken},
+            credentials: 'same-origin'
+        }).then(response => response.json())
+        .then(data => {
+            const titleElement = button.closest('.d-flex').querySelector('p.subtask-link');
+            const svgElement = button.querySelector('svg');
+            if (data.is_complete) {
+                svgElement.innerHTML = `<path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>`;
+                titleElement.innerHTML = `<s>${data.title}</s>`;
+            } else {
+                svgElement.innerHTML = `<path d="M8 15A7 7 0 1 1 8 1 a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0 a8 8 0 0 0 0 16"/>`;
+                titleElement.textContent = data.title; // Use textContent for non-HTML updates
+            }
+        }).catch(error => console.error('Error:', error));
+    }
+
+    $(document).ready(function(){
+        $(".subtask-link").click(function(event){
+            event.preventDefault();  // prevent the default action
+            var detailUrl = $(this).data('url'); // Get the URL from the data attribute
+            $.ajax({
+                url: detailUrl,
+                success: function(result){
+                    $(".sudtask-detail").html(result);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Error:", textStatus, errorThrown); // Print the error to the console
                 }
             });
         });

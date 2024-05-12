@@ -289,20 +289,49 @@ def all_tasks(request):
     }
     return render(request, 'task_checklist/all_tasks.html', context)
 
+from django.contrib import messages
+
 @login_required
-def create_subtask(request):
+def create_subtask(request, task_id=None):
+    task = None
+    if task_id:
+        task = get_object_or_404(Task, id=task_id)
+    
     if request.method == 'POST':
         sub_form = SubTaskForm(request.POST)
         if sub_form.is_valid():
             subtask = sub_form.save(commit=False)
+            if task:
+                subtask.task = task
             subtask.save()
-            return redirect('/')
+            messages.success(request, "SubTask created successfully!")
+            return redirect('all_tasks')
+        else:
+            messages.error(request, "Error in form submission.")
     else:
-        sub_form = SubTaskForm()  # Corrected variable name here for consistency
+        sub_form = SubTaskForm(initial={'task': task_id})
+    
     context = {
-        'sub_form': sub_form,  # Now sub_form is always defined before this line
+        'sub_form': sub_form,
+        'task': task
     }
     return render(request, 'task_checklist/well_over.html', context)
+
+def subtask_detail(request, pk):
+    subtask = get_object_or_404(SubTask, id=pk)
+    context = {
+        'subtask': subtask, 
+    }
+    return render(request, 'task_checklist/subtask_detail.html', context)
+
+@require_POST
+def toggle_subtask_status(request):
+    subtask_id = request.GET.get('subtask_id')
+    subtask = get_object_or_404(SubTask, id=subtask_id)
+    subtask.is_complete = not subtask.is_complete
+    subtask.save()
+
+    return JsonResponse({'title': subtask.title, 'is_complete': subtask.is_complete})
 
 @login_required
 @require_POST

@@ -75,4 +75,7 @@
         </a>
     </div>
 </div>
+<a href="{% url 'create_subtask_for_task' task.pk %}" class='btn btn-primary'>
+    Add SubTask
+</a>
 <p>{{ task.description|safe }}</p>

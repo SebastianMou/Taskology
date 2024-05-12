@@ -69,6 +69,20 @@
     .text-strikethrough {
         text-decoration: line-through;
     }
+    .mb-5 {
+        margin-bottom: 4rem !important; /* This is equivalent to 80px */
+    }
+    #transparent-btn {
+        opacity: 0.7;
+    }
+    #sidebarRight, #sidebarRight2, #sidebarRight3 {
+        width: 45% !important;
+    }
+    @media all and (max-width: 768px) {
+        #sidebarRight, #sidebarRight2, #sidebarRight3 {
+            width: 95% !important;
+        }
+    }
 </style>
 <div class="my_day">
     <div class="padd">
@@ -153,10 +167,18 @@
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                         <li>
-                                            <a class="dropdown-item" href="{% url 'edit_task_ck' task.pk %}">Edit</a>
+                                            <a class="dropdown-item" href="{% url 'edit_task_ck' task.pk %}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                                                    <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
+                                                  </svg> Edit
+                                            </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{% url 'delete_task_ck' task.pk %}">Delete</a>
+                                            <a class="dropdown-item" href="{% url 'delete_task_ck' task.pk %}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash2" viewBox="0 0 16 16">
+                                                    <path d="M14 3a.7.7 0 0 1-.037.225l-1.684 10.104A2 2 0 0 1 10.305 15H5.694a2 2 0 0 1-1.973-1.671L2.037 3.225A.7.7 0 0 1 2 3c0-1.105 2.686-2 6-2s6 .895 6 2M3.215 4.207l1.493 8.957a1 1 0 0 0 .986.836h4.612a1 1 0 0 0 .986-.836l1.493-8.957C11.69 4.689 9.954 5 8 5s-3.69-.311-4.785-.793"/>
+                                                  </svg> Delete
+                                            </a>
                                         </li>
                                     </ul>
                                 </div>
@@ -164,29 +186,37 @@
                         </tr>
                         {% for subtask in task.subtasks.all %}
                             <tr>
-                                <td style="width: 25px;">
+                                <td id="adsasdsd" style="width: 23px;">
                                     <td style="margin-bottom: 10px;">
                                         <div class="d-flex">
-                                            <button type="button" class="btn btn-link toggle-task-status" data-task-id="{{ task.id }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="{% if task.status != 'COMPLETED' %}bi bi-circle{% else %}bi bi-check2-circle{% endif %}" viewBox="0 0 16 16">
-                                                        <path d="M2.5 8a5.5 5.5 0 1 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a .5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
-                                                        <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3 a.5.5 0 0 0 .708 0z"/>
+                                            <button type="button" class="btn btn-link toggle-task-status" data-subtask-id="{{ subtask.id }}" onclick="toggleSubtaskStatus(this)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="{% if subtask.is_complete %}bi bi-check2-circle{% else %}bi bi-circle{% endif %}" viewBox="0 0 16 16">
+                                                    {% if subtask.is_complete %}
+                                                        <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
+                                                        <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
+                                                    {% else %}
+                                                        <path d="M8 15A7 7 0 1 1 8 1 a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0 a8 8 0 0 0 0 16"/>
+                                                    {% endif %}
                                                 </svg>
                                             </button>
-                                            <p style="margin-left: 10px;">
-                                                {{ subtask.title }}
+                                            <p class="subtask-link" data-url="{% url 'subtask_detail' subtask.pk %}" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight3" aria-controls="sidebarRight3" style="margin-left: 10px;">
+                                                {% if subtask.is_complete %}
+                                                    <s>{{ subtask.title }}</s>
+                                                {% else %}
+                                                    {{ subtask.title }}
+                                                {% endif %}
                                             </p>
                                         </div>
                                     </td>
                                 </td>
                             </tr>
                         {% endfor %}
+
                     {% empty %}
                         <tr>
                             <td colspan="5" class="text-center">No tasks found</td>
                         </tr>
                     {% endfor %}
-
                 </div>
             </tbody>
         </table>
@@ -202,22 +232,6 @@
         </tr>
     </div>
 </div>
-<style>
-    .mb-5 {
-        margin-bottom: 4rem !important; /* This is equivalent to 80px */
-    }
-    #transparent-btn {
-        opacity: 0.7;
-    }
-    #sidebarRight, #sidebarRight2 {
-        width: 45% !important;
-    }
-    @media all and (max-width: 768px) {
-        #sidebarRight, #sidebarRight2 {
-            width: 95% !important;
-        }
-    }
-</style>
 <!-- Sidebar Content Create Task -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarRight" aria-labelledby="sidebarLabel">
     <div class="offcanvas-header">
@@ -273,12 +287,10 @@
     </div>
 </div>
 
-<button class="btn btn-info" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight3" aria-controls="sidebarRight3">test</button>
-
-<!-- Sidebar Content View subform -->
+<!-- Sidebar Content View Task -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarRight3" aria-labelledby="sidebarLabel">
     <div class="offcanvas-header">
-    <p id="sidebarLabel">Subform</p>
+    <p id="sidebarLabel">Subtask</p>
     <a type="button" class="text-reset" data-bs-dismiss="offcanvas" aria-label="Close">
         <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
             <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
@@ -287,8 +299,9 @@
     </div>
     <div class="offcanvas-body">
         <div class="container-fluid full-height">
-            <!-- dinamilclly load the subtask forms here -->
-            <div id="form-container"></div>
+            <div class="sudtask-detail">
+                <!-- subtask detail will display here (dynamicly loaded) -->
+            </div>
         </div>
     </div>
 </div>
@@ -384,18 +397,43 @@
         });
     });
 
+    function toggleSubtaskStatus(button) {
+        const subtaskId = button.getAttribute('data-subtask-id');
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch(`{% url 'toggle_subtask_status' %}?subtask_id=${subtaskId}`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrftoken},
+            credentials: 'same-origin'
+        }).then(response => response.json())
+        .then(data => {
+            const titleElement = button.closest('.d-flex').querySelector('p.subtask-link');
+            const svgElement = button.querySelector('svg');
+            if (data.is_complete) {
+                svgElement.innerHTML = `<path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>`;
+                titleElement.innerHTML = `<s>${data.title}</s>`;
+            } else {
+                svgElement.innerHTML = `<path d="M8 15A7 7 0 1 1 8 1 a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0 a8 8 0 0 0 0 16"/>`;
+                titleElement.textContent = data.title; // Use textContent for non-HTML updates
+            }
+        }).catch(error => console.error('Error:', error));
+    }
+
     $(document).ready(function(){
+        $(".subtask-link").click(function(event){
+            event.preventDefault();  // prevent the default action
+            var detailUrl = $(this).data('url'); // Get the URL from the data attribute
             $.ajax({
-                url: '{% url "create_subtask" %}',  // Ensure the URL is correct
-                type: 'get',  // GET request to fetch the form
-                success: function(response){
-                    $('#form-container').html(response);  // Inject the form HTML into the page
+                url: detailUrl,
+                success: function(result){
+                    $(".sudtask-detail").html(result);
                 },
-                error: function(xhr, status, error){
-                    console.log("Error: " + error);
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Error:", textStatus, errorThrown); // Print the error to the console
                 }
             });
         });
+    });
 </script>
 
 {% endblock %}
