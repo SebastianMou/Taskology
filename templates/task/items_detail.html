@@ -75,7 +75,18 @@
         </a>
     </div>
 </div>
-<a href="{% url 'create_subtask_for_task' task.pk %}" class='btn btn-primary'>
-    Add SubTask
-</a>
+<div style="padding-bottom: 4px;">
+    <a href="{% url 'create_subtask_for_task' task.pk %}" class='btn btn-primary btn-sm'>
+        Add SubTask
+    </a>
+</div>
+{% for subtask in sub_tasks %}
+    {% if subtask.is_complete %}
+        <span class="badge rounded-pill bg-success">{{ subtask.title }}</span>
+    {% else %}
+        <span class="badge rounded-pill bg-primary">{{ subtask.title }}</span>
+    {% endif %}
+{% endfor %}
+
+
 <p>{{ task.description|safe }}</p>

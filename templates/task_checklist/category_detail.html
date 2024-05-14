@@ -101,7 +101,7 @@
     <div class="modal-content">
         <div class="modal-body">
             <p style="color: red;"><b>WARNING:</b> <w style="color: black;">This will delete all your tasks permanently. Are you sure you want to proceed?"</w> </p>
-            <form method="POST" action="{% url 'delete_all_tasks' %}">
+            <form method="POST" action="{% url 'delete_all_tasks' category_id=task_category.id %}">
                 {% csrf_token %}
                 <button class="btn btn-danger" type="submit">Confirm Delete All</button>
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Close">
@@ -129,7 +129,7 @@
             </thead>
             <tbody id="sortable-tbody">
                 <div> 
-                    {% for task in all_tasks %}
+                    {% for task in tasks %}
                         <tr id="task-row-{{ task.id }}">
                             <!-- display when on laptop -->
                             <td style="width: 25px; height: auto;" id="td-one">
@@ -246,25 +246,24 @@
     </div>
     <div class="offcanvas-body">
         <div class="container-fluid full-height">
-                <form id="taskForm" method="POST" action="{% url 'category_detail' pk=task_category.id %}">
-                    {% csrf_token %}
-                    {{ form_task.media }}
-                    <div class="form-group">
-                        {{ form_task.title }}
-                    </div>
-                    <div class="form-group">
-                        {{ form_task.completion_date }}
-                    </div>
-                    <div class="form-group">
-                        {{ form_task.completion_time }}
-                    </div>
-                    {{ form_task.description }}
-                    <br>
-                    <input type="submit" value="Save Changes" class="btn btn-primary">
-                    <a href="{% url 'category_detail' pk=task_category.id %}" class="btn btn-secondary">Cancel</a>
-                </form>
+            <form id="taskForm" method="POST" action="{% url 'category_detail' pk=task_category.id %}">
+                {% csrf_token %}
+                {{ form_task.media }}
+                <div class="form-group">
+                    {{ form_task.title }}
+                </div>
+                <div class="form-group">
+                    {{ form_task.completion_date }}
+                </div>
+                <div class="form-group">
+                    {{ form_task.completion_time }}
+                </div>
+                {{ form_task.description }}
+                <br>
+                <input type="submit" value="Save Changes" class="btn btn-primary">
+                <a href="{% url 'category_detail' pk=task_category.id %}" class="btn btn-secondary">Cancel</a>
+            </form>
             
-            </div>
         </div>
     </div>
 </div>
@@ -330,20 +329,24 @@
             event.preventDefault(); // Prevent the default form submission
             var formData = $(this).serialize(); // Serialize the form data
 
-            // Correct the URL here to use the same URL that the form uses
             $.ajax({
                 type: "POST",
-                url: "{% url 'category_detail' pk=task_category.id %}", // Use the correct URL for category_detail
+                url: "{% url 'category_detail' pk=task_category.id %}",
                 data: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },  // Ensure this header is set
                 success: function(response) {
-                    $('#sortable-tbody').html(response); // Update the task list
+                    $('#sortable-tbody').html(response); // Make sure this is the correct ID
+                    console.log("Update successful, page updated with new task list.");
                 },
-                error: function() {
-                    alert('Error updating tasks.');
+                error: function(xhr, status, error) {
+                    alert('Error updating tasks: ' + error.message);
+                    console.error("Error details:", status, xhr.responseText);
                 }
             });
         });
     });
+
+
 
     $(document).ready(function(){
         $(".task-link").click(function(event){

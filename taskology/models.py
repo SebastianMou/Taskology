@@ -3,12 +3,26 @@ from django.contrib.auth.models import User
 from tinymce.models import HTMLField
 
 # Create your models here.
+class TaskCategory(models.Model):
+    name = models.CharField(max_length=100, null=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='task_categories', null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name_plural = 'taskcategories'
+        ordering = ('-created_at',)
+    
 class Task(models.Model):
     STATUS_CHOICES = [
         ('NOT_STARTED', 'Not Started'),
         ('IN_PROGRESS', 'In Progress'),
         ('COMPLETED', 'Completed'),
     ]
+    category = models.ForeignKey(TaskCategory, on_delete=models.CASCADE, related_name='tasks', null=True)
+
     title = models.CharField(max_length=255)
     completion_date = models.DateField(null=True, blank=True)  # Separate date field
     completion_time = models.TimeField(null=True, blank=True)  # Separate time field
@@ -24,6 +38,7 @@ class Task(models.Model):
 
     class Meta:
         verbose_name_plural = 'tasks'
+        ordering = ('-created_at',)
 
 class SubTask(models.Model):
     # A reference to the parent task
@@ -41,6 +56,7 @@ class SubTask(models.Model):
 
     class Meta:
         verbose_name_plural = 'subtasks'
+        ordering = ('-created_at',)
 
 class CompanyNotification(models.Model):
     title = models.CharField(max_length=255)

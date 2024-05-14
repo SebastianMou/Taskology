@@ -26,12 +26,16 @@ urlpatterns = [
     path('items_detail/<int:pk>/', views.items_detail, name='items_detail'),
     path('delete_task/<int:pk>/', views.delete_task, name='delete_task'),
     path('edit_task/<int:pk>/', views.edit_task, name='edit_task'),
-    path('delete_all_tasks/', views.delete_all_tasks, name='delete_all_tasks'),
+    path('delete_all_tasks/<int:category_id>/', views.delete_all_tasks, name='delete_all_tasks'),
 
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('profile/', views.profile, name='profile'),
+    path('category_detail/<int:pk>/', views.category_detail, name='category_detail'),
+    path('category/<int:category_id>/delete/', views.category_delete, name='category_delete'),
+    path('category_edit/<int:category_id>/', views.category_edit, name='category_edit'),
 
     # tasks check list
-    path('all_tasks/', views.all_tasks, name='all_tasks'),
+    # path('all_tasks/', views.all_tasks, name='all_tasks'),
     path('delete_task_ck/<int:pk>/', views.delete_task_ck, name='delete_task_ck'),
     path('edit_task_ck/<int:pk>/', views.edit_task_ck, name='edit_task_ck'),
     path('complete-task/<int:task_id>/', views.complete_task, name='complete_task'),

@@ -15,8 +15,8 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 
 from .tokens import account_activation_token
-from .models import Task, CompanyNotification, SubTask
-from .forms import TaskForm, UserRegisterForm, SubTaskForm
+from .models import Task, CompanyNotification, SubTask, TaskCategory
+from .forms import TaskForm, UserRegisterForm, SubTaskForm, TaskCategoryForm
 
 # Create your views here.
 @login_required
@@ -95,8 +95,10 @@ def update_task_order(request):
 
 def items_detail(request, pk):
     task = get_object_or_404(Task, id=pk)
+    sub_tasks = task.subtasks.all()
     context = {
         'task': task,
+        'sub_tasks': sub_tasks,
     }
     return render(request, 'task/items_detail.html', context)
 
@@ -112,20 +114,13 @@ def delete_task(request, pk):
     return render(request, 'task/confirm_delete.html', context)
 
 @login_required
-def delete_all_tasks(request):
+def delete_all_tasks(request, category_id):
     if request.method == 'POST':
-        # Fetch all tasks owned by the logged-in user
-        tasks = Task.objects.filter(owner=request.user)
-        task_count = tasks.count()
-
-        # Delete all fetched tasks
+        tasks = Task.objects.filter(owner=request.user, category_id=category_id)
         tasks.delete()
-
-        # return HttpResponse(f"Deleted {task_count} tasks.", status=200)
-        return redirect('all_tasks')
+        return redirect('category_detail', pk=category_id)
     else:
-        # If not POST, maybe show a confirmation page or simply redirect
-        return redirect('all_tasks')
+        return redirect('category_detail', pk=category_id)
 
 @login_required
 def edit_task(request, pk):
@@ -262,34 +257,116 @@ def public_terms_of_service(request):
 
 @login_required
 def dashboard(request):
-    return render(request, 'authentication/dashboard.html')
+    task_categories_file = TaskCategory.objects.filter(owner=request.user)
+    context = {
+        'task_categories_file': task_categories_file,
+    }
+    return render(request, 'authentication/dashboard.html', context)
 
 @login_required
-def all_tasks(request):
-    all_tasks = Task.objects.filter(owner=request.user)
-    sub_tasks = SubTask.objects.filter(task__owner=request.user)
+def profile(request):
+    task_categories_file = TaskCategory.objects.filter(owner=request.user)
+    if request.method == "POST":
+        form = TaskCategoryForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.owner = request.user
+            task.save()
+            return redirect('profile')
+    else:
+        form = TaskCategoryForm(request.POST)
+
+    context = {
+        'task_categories_file': task_categories_file,
+        'form': form,
+    }
+    return render(request, 'authentication/profile.html', context)
+
+@login_required
+def category_detail(request, pk):
+    task_category = get_object_or_404(TaskCategory, id=pk, owner=request.user)
+    tasks = task_category.tasks.all()
+
     if request.method == 'POST':
         form_task = TaskForm(request.POST)
         if form_task.is_valid():
             task = form_task.save(commit=False)
             task.owner = request.user
+            task.category = task_category  # Explicitly setting the category
             task.save()
-            # After saving, return only the fragment of the page that needs updating
-            tasks_html = render_to_string('task_checklist/_tasks_list.html', {'all_tasks': all_tasks}, request=request)
-            return HttpResponse(tasks_html)
+            
+            # Use headers to check for an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                tasks_html = render_to_string('task_checklist/_tasks_list.html', {'tasks': task_category.tasks.all()}, request=request)
+                return HttpResponse(tasks_html)
+            else:
+                return redirect('category_detail', pk=task_category.id)
         else:
-            return HttpResponse("Form is not valid", status=400)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return HttpResponse("Form is not valid", status=400)
+
     else:
         form_task = TaskForm()
 
     context = {
-        'all_tasks': all_tasks,
+        'task_category': task_category,
+        'tasks': tasks,
         'form_task': form_task,
-        'sub_tasks': sub_tasks,
     }
-    return render(request, 'task_checklist/all_tasks.html', context)
+    return render(request, 'task_checklist/category_detail.html', context)
 
-from django.contrib import messages
+@login_required
+def category_delete(request, category_id):
+    # Get the category, ensuring it belongs to the logged-in user
+    category = get_object_or_404(TaskCategory, id=category_id, owner=request.user)
+
+    if request.method == 'POST':
+        category.delete()
+        return redirect('profile')  # Redirect to a URL where you list categories or to the homepage, etc.
+    else:
+        return redirect('profile')
+
+@login_required
+def category_edit(request, category_id):
+    # Fetch the category, ensuring it belongs to the logged-in user
+    category = get_object_or_404(TaskCategory, id=category_id, owner=request.user)
+
+    # Instantiate the form with the existing category data when the method is GET
+    if request.method == 'POST':
+        form = TaskCategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            # Redirect to a success page or the detail view of the category
+            return redirect('profile')
+    else:
+        form = TaskCategoryForm(instance=category)
+
+    # Render the edit page with the form
+    return render(request, 'task_checklist/edit_category.html', {'form': form, 'category': category})
+
+# @login_required
+# def all_tasks(request):
+#     all_tasks = Task.objects.filter(owner=request.user)
+#     sub_tasks = SubTask.objects.filter(task__owner=request.user)
+#     if request.method == 'POST':
+#         form_task = TaskForm(request.POST)
+#         if form_task.is_valid():
+#             task = form_task.save(commit=False)
+#             task.owner = request.user
+#             task.save()
+#             tasks_html = render_to_string('task_checklist/_tasks_list.html', {'all_tasks': all_tasks}, request=request)
+#             return HttpResponse(tasks_html)
+#         else:
+#             return HttpResponse("Form is not valid", status=400)
+#     else:
+#         form_task = TaskForm()
+
+#     context = {
+#         'all_tasks': all_tasks,
+#         'form_task': form_task,
+#         'sub_tasks': sub_tasks,
+#     }
+#     return render(request, 'task_checklist/all_tasks.html', context)
 
 @login_required
 def create_subtask(request, task_id=None):
@@ -303,9 +380,12 @@ def create_subtask(request, task_id=None):
             subtask = sub_form.save(commit=False)
             if task:
                 subtask.task = task
-            subtask.save()
-            messages.success(request, "SubTask created successfully!")
-            return redirect('all_tasks')
+                subtask.save()
+                messages.success(request, "SubTask created successfully!")
+                # Redirect to the category detail page using the task's category id
+                return redirect('category_detail', pk=task.category.id)
+            else:
+                messages.error(request, "No task found to attach the subtask.")
         else:
             messages.error(request, "Error in form submission.")
     else:
@@ -348,7 +428,7 @@ def complete_task(request, task_id):
 def delete_task_ck(request, pk):
     task = Task.objects.get(id=pk, owner=request.user)
     task.delete()
-    return redirect('all_tasks')
+    return redirect('category_detail', pk=task.category.pk)
 
 @login_required
 def edit_task_ck(request, pk):
@@ -357,7 +437,7 @@ def edit_task_ck(request, pk):
         form = TaskForm(request.POST, instance=task)
         if form.is_valid():
             form.save()
-            return redirect('all_tasks') 
+            return redirect('category_detail', pk=task.category.pk) 
     else:
         form = TaskForm(instance=task) 
     
