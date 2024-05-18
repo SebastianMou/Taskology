@@ -1,3 +1,6 @@
-
-<h1>{{ subtask.title }}</h1>
-<p>{{ subtask.description|safe }}</p>
+<!-- task_checklist/subtask_detail.html -->
+<div>
+    <h4>{{ subtask.title }}</h4>
+    <p>{{ subtask.description }}</p>
+    <p>Status: {% if subtask.is_complete %}Complete{% else %}Incomplete{% endif %}</p>
+</div>

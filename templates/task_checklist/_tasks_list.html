@@ -2,124 +2,209 @@
 {% load static %}
 
 {% for task in tasks %}
-<tr id="task-row-{{ task.id }}">
-    <!-- display when on laptop -->
-    <td style="width: 25px; height: auto;" id="td-one">
-        <button type="button" class="btn btn-link toggle-task-status" data-task-id="{{ task.id }}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="{% if task.status != 'COMPLETED' %}bi bi-circle{% else %}bi bi-check2-circle{% endif %}" viewBox="0 0 16 16">
-                <!-- Insert the appropriate path based on whether the task is completed or not -->
-                {% if task.status != 'COMPLETED' %}
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                {% else %}
-                    <path d="M2.5 8a5.5 5.5 0 1 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a .5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
-                    <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3 a.5.5 0 0 0 .708 0z"/>
-                {% endif %}
-            </svg>
-        </button>
-    </td>
-    <td>
-        <div class="flex-container">
-            <p id="title-{{ task.id }}" class="task-link {% if task.status == 'COMPLETED' %}text-strikethrough{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2" data-url="{% url 'items_detail' task.pk %}">
-                {{ task.title }}
-            </p>
-        </div>
-    </td>
-    <td id="element">{{ task.created_at }}</td>
-    <td id="element" class="task-status">
-        <span class="badge {% if task.status != 'COMPLETED' %}bg-info text-dark{% else %}bg-success text-dark{% endif %}">
-            {{ task.status }}
-        </span>
-    </td>
-    <td id="element" class="text-end">
-        <div class="dropdown">
-            <button class="btn btn-link" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
-                    <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+    <tr id="task-row-{{ task.id }}">
+        <td style="width: 25px; height: auto;" id="td-one">
+            <button type="button" class="btn btn-link toggle-task-status" data-task-id="{{ task.id }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="{% if task.status != 'COMPLETED' %}bi bi-circle{% else %}bi bi-check2-circle{% endif %}" viewBox="0 0 16 16">
+                    {% if task.status != 'COMPLETED' %}
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                    {% else %}
+                        <path d="M2.5 8a5.5 5.5 0 1 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
+                        <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3 a.5.5 0 0 0 .708 0z"/>
+                    {% endif %}
                 </svg>
             </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li>
-                    <a class="dropdown-item" href="{% url 'edit_task_ck' task.pk %}">Edit</a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="{% url 'delete_task_ck' task.pk %}">Delete</a>
-                </li>
-            </ul>
-        </div>
-    </td>
-</tr>
-{% for subtask in task.subtasks.all %}
-    <tr>
-        <td style="width: 25px;">
-            <td style="margin-bottom: 10px;">
-                <div class="d-flex">
-                    <button type="button" class="btn btn-link toggle-task-status" data-subtask-id="{{ subtask.id }}" onclick="toggleSubtaskStatus(this)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="{% if subtask.is_complete %}bi bi-check2-circle{% else %}bi bi-circle{% endif %}" viewBox="0 0 16 16">
-                            {% if subtask.is_complete %}
-                                <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
-                                <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
-                            {% else %}
-                                <path d="M8 15A7 7 0 1 1 8 1 a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0 a8 8 0 0 0 0 16"/>
-                            {% endif %}
-                        </svg>
-                    </button>
-                    <p class="subtask-link" data-url="{% url 'subtask_detail' subtask.pk %}" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight3" aria-controls="sidebarRight3" style="margin-left: 10px;">
-                        {% if subtask.is_complete %}
-                            <s>{{ subtask.title }}</s>
-                        {% else %}
-                            {{ subtask.title }}
-                        {% endif %}
-                    </p>
-                </div>
-            </td>
         </td>
+        <td>
+            <div class="flex-container">
+                <p id="title-{{ task.id }}" class="task-link {% if task.status == 'COMPLETED' %}text-strikethrough{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight2" aria-controls="sidebarRight2" data-url="{% url 'items_detail' task.pk %}">
+                    {{ task.title }}
+                </p>
+            </div>
+        </td>
+        <td id="element">{{ task.created_at }}</td>
+        <td id="element" class="task-status">
+            <span class="badge {% if task.status != 'COMPLETED' %}bg-info text-dark{% else %}bg-success text-dark{% endif %}">
+                {{ task.status }}
+            </span>
+        </td>
+        <td id="element" class="text-end">
+            <div class="dropdown">
+                <button class="btn btn-link" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
+                        <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+                    </svg>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li>
+                        <a class="dropdown-item" href="{% url 'edit_task_ck' task.pk %}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                                <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
+                            </svg> Edit
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'delete_task_ck' task.pk %}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash2" viewBox="0 0 16 16">
+                                <path d="M14 3a.7.7 0 0 1-.037.225l-1.684 10.104A2 2 0 0 1 10.305 15H5.694a2 2 0 0 1-1.973-1.671L2.037 3.225A.7.7 0 0 1 2 3c0-1.105 2.686-2 6-2s6 .895 6 2M3.215 4.207l1.493 8.957a1 1 0 0 0 .986.836h4.612a1 1 0 0 0 .986-.836l1.493-8.957C11.69 4.689 9.954 5 8 5s-3.69-.311-4.785-.793"/>
+                            </svg> Delete
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="5">
+            <div id="subtasks-container-{{ task.id }}" style="padding-left: 30px;">
+                {% for subtask in task.subtasks.all %}
+                    <div class="d-flex align-items-center" style="padding: 5px 0;">
+                        <button type="button" class="btn btn-link toggle-task-status" data-subtask-id="{{ subtask.id }}" onclick="toggleSubtaskStatus(this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="{% if subtask.is_complete %}bi bi-check2-circle{% else %}bi bi-circle{% endif %}" viewBox="0 0 16 16">
+                                {% if subtask.is_complete %}
+                                    <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
+                                    <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
+                                {% else %}
+                                    <path d="M8 15A7 7 0 1 1 8 1 a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0 a8 8 0 0 0 0 16"/>
+                                {% endif %}
+                            </svg>
+                        </button>
+                        <p class="subtask-link" data-url="{% url 'subtask_detail' subtask.pk %}" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight3" aria-controls="sidebarRight3" style="margin-left: 10px;">
+                            {% if subtask.is_complete %}
+                                <s>{{ subtask.title }}</s>
+                            {% else %}
+                                {{ subtask.title }}
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        </td>
+    </tr>
+{% empty %}
+    <tr>
+        <td colspan="5" class="text-center">No tasks found</td>
     </tr>
 {% endfor %}
 
-{% empty %}
-<tr>
-    <td colspan="5" class="text-center">No tasks found</td>
-</tr>
-{% endfor %}
 
 <!-- Sidebar Content View Task -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarRight2" aria-labelledby="sidebarLabel">
     <div class="offcanvas-header">
-    <p id="sidebarLabel">Task</p>
-    <a type="button" class="text-reset" data-bs-dismiss="offcanvas" aria-label="Close">
-        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
-            <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
-        </svg>
-    </a>
+        <p id="sidebarLabel">Task</p>
+        <a type="button" class="text-reset" data-bs-dismiss="offcanvas" aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+                <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
+            </svg>
+        </a>
     </div>
     <div class="offcanvas-body">
         <div class="container-fluid full-height">
             <div class="task-detail">
-                <!-- task detail will display here (dynamicly loaded) -->
+                <!-- task detail will display here (dynamically loaded) -->
             </div>
         </div>
     </div>
 </div>
 
 <script>
-     $(document).ready(function(){
-        $(".task-link").click(function(event){
+    $(document).ready(function () {
+        // Capture task ID when modal is shown
+        $('#modelsubtaskcreate').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var taskId = button.data('task-id');
+            var modal = $(this);
+            modal.find('#task_id').val(taskId);
+        });
+
+        // Handle Subtask Creation Form Submission
+        $('body').on('submit', '#sub_task_create', function (e) {
+            e.preventDefault();
+            var taskId = $('#task_id').val();
+
+            $.ajax({
+                type: 'POST',
+                url: "/create_subtask/" + taskId + "/",
+                data: {
+                    title: $('#subtitle').val(),
+                    description: $('#subdescription').val(),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                },
+                success: function (response) {
+                    if (response.subtask) {
+                        let subtask = response.subtask;
+                        let subtasksContainer = $('#subtasks-container-' + subtask.task_id);
+
+                        if (subtasksContainer.length === 0) {
+                            console.error('Subtasks container not found for task ID:', subtask.task_id);
+                        } else {
+                            let newSubtaskHtml = `
+                                <tr>
+                                    <td style="width: 23px;"></td>
+                                    <td style="margin-bottom: 10px;">
+                                        <div class="d-flex">
+                                            <button type="button" class="btn btn-link toggle-task-status" data-subtask-id="${subtask.id}" onclick="toggleSubtaskStatus(this)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="${subtask.is_complete ? 'bi bi-check2-circle' : 'bi bi-circle'}" viewBox="0 0 16 16">
+                                                    ${subtask.is_complete ? `
+                                                        <path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/>
+                                                        <path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>` : `
+                                                        <path d="M8 15A7 7 0 1 1 8 1 a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0 a8 8 0 0 0 0 16"/>`}
+                                                </svg>
+                                            </button>
+                                            <p class="subtask-link" data-url="/subtask_detail/${subtask.id}/" data-bs-toggle="offcanvas" data-bs-target="#sidebarRight3" aria-controls="sidebarRight3" style="margin-left: 10px;">
+                                                ${subtask.is_complete ? `<s>${subtask.title}</s>` : `${subtask.title}`}
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>`;
+                            subtasksContainer.prepend(newSubtaskHtml); // Prepend to the top
+                        }
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error occurred:", error);
+                }
+            });
+        });
+
+        // Use event delegation to bind click event to dynamically added .subtask-link elements
+        $('body').on('click', '.subtask-link', function (event) {
             event.preventDefault();  // prevent the default action
             var detailUrl = $(this).data('url'); // Get the URL from the data attribute
             $.ajax({
                 url: detailUrl,
-                success: function(result){
-                    $(".task-detail").html(result);
+                success: function (result) {
+                    $(".subtask-detail").html(result); // Ensure the selector matches
+                    var offcanvasElement = document.getElementById('sidebarRight3');
+                    var offcanvas = new bootstrap.Offcanvas(offcanvasElement);
+                    offcanvas.show();
                 },
-                error: function(jqXHR, textStatus, errorThrown) {
+                error: function (jqXHR, textStatus, errorThrown) {
                     console.error("Error:", textStatus, errorThrown); // Print the error to the console
                 }
             });
         });
     });
 
-    $(document).ready(function() {
-        $('.toggle-task-status').on('click', function() {
+
+    $(document).ready(function () {
+        $(".task-link").click(function (event) {
+            event.preventDefault();  // prevent the default action
+            var detailUrl = $(this).data('url'); // Get the URL from the data attribute
+            $.ajax({
+                url: detailUrl,
+                success: function (result) {
+                    $(".task-detail").html(result);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error("Error:", textStatus, errorThrown); // Print the error to the console
+                }
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        $('.toggle-task-status').on('click', function () {
             var btn = $(this);
             var taskId = btn.data('task-id');
             var row = $('#task-row-' + taskId);
@@ -132,7 +217,7 @@
                     csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').val(),
                     task_id: taskId,
                 },
-                success: function(response) {
+                success: function (response) {
                     // Update the icon based on the new status
                     var newIconHtml = (response.status === 'COMPLETED') ?
                         '<svg class="bi bi-check2-circle" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 1 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/></svg>' :
@@ -162,32 +247,32 @@
 
         fetch(`{% url 'toggle_subtask_status' %}?subtask_id=${subtaskId}`, {
             method: 'POST',
-            headers: {'X-CSRFToken': csrftoken},
+            headers: { 'X-CSRFToken': csrftoken },
             credentials: 'same-origin'
         }).then(response => response.json())
-        .then(data => {
-            const titleElement = button.closest('.d-flex').querySelector('p.subtask-link');
-            const svgElement = button.querySelector('svg');
-            if (data.is_complete) {
-                svgElement.innerHTML = `<path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>`;
-                titleElement.innerHTML = `<s>${data.title}</s>`;
-            } else {
-                svgElement.innerHTML = `<path d="M8 15A7 7 0 1 1 8 1 a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0 a8 8 0 0 0 0 16"/>`;
-                titleElement.textContent = data.title; // Use textContent for non-HTML updates
-            }
-        }).catch(error => console.error('Error:', error));
+            .then(data => {
+                const titleElement = button.closest('.d-flex').querySelector('p.subtask-link');
+                const svgElement = button.querySelector('svg');
+                if (data.is_complete) {
+                    svgElement.innerHTML = `<path d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0"/><path d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>`;
+                    titleElement.innerHTML = `<s>${data.title}</s>`;
+                } else {
+                    svgElement.innerHTML = `<path d="M8 15A7 7 0 1 1 8 1 a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0 a8 8 0 0 0 0 16"/>`;
+                    titleElement.textContent = data.title; // Use textContent for non-HTML updates
+                }
+            }).catch(error => console.error('Error:', error));
     }
 
-    $(document).ready(function(){
-        $(".subtask-link").click(function(event){
+    $(document).ready(function () {
+        $(".subtask-link").click(function (event) {
             event.preventDefault();  // prevent the default action
             var detailUrl = $(this).data('url'); // Get the URL from the data attribute
             $.ajax({
                 url: detailUrl,
-                success: function(result){
+                success: function (result) {
                     $(".sudtask-detail").html(result);
                 },
-                error: function(jqXHR, textStatus, errorThrown) {
+                error: function (jqXHR, textStatus, errorThrown) {
                     console.error("Error:", textStatus, errorThrown); // Print the error to the console
                 }
             });

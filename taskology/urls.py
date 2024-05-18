@@ -32,7 +32,9 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('category_detail/<int:pk>/', views.category_detail, name='category_detail'),
     path('category/<int:category_id>/delete/', views.category_delete, name='category_delete'),
-    path('category_edit/<int:category_id>/', views.category_edit, name='category_edit'),
+
+    path('create-task-category/', views.create_task_category, name='create_task_category'),
+    path('update_task_category/<int:pk>/', views.update_task_category, name='update_task_category'),
 
     # tasks check list
     # path('all_tasks/', views.all_tasks, name='all_tasks'),
@@ -40,8 +42,11 @@ urlpatterns = [
     path('edit_task_ck/<int:pk>/', views.edit_task_ck, name='edit_task_ck'),
     path('complete-task/<int:task_id>/', views.complete_task, name='complete_task'),
 
-    path('create_subtask/<int:task_id>/', views.create_subtask, name='create_subtask_for_task'),
+    path('create_subtask/<int:task_id>/', views.create_subtask, name='create_subtask'),
+
     path('subtask_detail/<int:pk>/', views.subtask_detail, name='subtask_detail'),
+    path('search/', views.search, name='search'),
+    
     path('toggle_subtask_status/', views.toggle_subtask_status, name='toggle_subtask_status'),
 
     path('notifications/', views.all_notifications, name='all_notifications'),

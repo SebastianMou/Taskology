@@ -56,7 +56,7 @@ class SubTask(models.Model):
 
     class Meta:
         verbose_name_plural = 'subtasks'
-        ordering = ('-created_at',)
+        ordering = ('created_at',)
 
 class CompanyNotification(models.Model):
     title = models.CharField(max_length=255)
